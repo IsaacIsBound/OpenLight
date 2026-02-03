@@ -396,6 +396,59 @@
       background: var(--border-color);
       margin: 5px 0;
     }
+    
+    /* Onion skin controls */
+    .footer-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--border-color);
+      margin: 0 10px;
+    }
+    
+    .onion-skin-btn.active {
+      background: rgba(255, 107, 53, 0.3);
+      border-color: var(--accent);
+    }
+    
+    .onion-settings {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    
+    .onion-settings label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .onion-input {
+      width: 35px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 11px;
+      text-align: center;
+    }
+    
+    /* Tween indicators */
+    .frame.tween-motion {
+      background: linear-gradient(90deg, var(--keyframe) 0%, rgba(79, 195, 247, 0.2) 50%, var(--keyframe) 100%);
+    }
+    
+    .frame.tween-arrow::before {
+      content: '→';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 8px;
+      color: var(--keyframe);
+    }
   </style>
 </head>
 <body>
@@ -499,6 +552,12 @@
         <button class="add-layer-btn" id="add-layer-btn">+ Add Layer</button>
         <button class="add-layer-btn" id="add-keyframe-btn">◆ Add Keyframe</button>
         <button class="add-layer-btn" id="add-blank-keyframe-btn">◇ Blank Keyframe</button>
+        <div class="footer-divider"></div>
+        <button class="add-layer-btn onion-skin-btn" id="onion-skin-btn" title="Onion Skin: OFF">🧅 Onion Skin</button>
+        <span class="onion-settings">
+          <label title="Frames before">◀ <input type="number" id="onion-before" value="2" min="0" max="10" class="onion-input"></label>
+          <label title="Frames after"><input type="number" id="onion-after" value="2" min="0" max="10" class="onion-input"> ▶</label>
+        </span>
       </div>
     </div>
   </div>

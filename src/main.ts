@@ -48,7 +48,7 @@ class FlareApp {
     this.renderer = new Renderer(this.canvas, this.document);
     
     // Create UI
-    this.timeline = new TimelineUI(this.document);
+    this.timeline = new TimelineUI(this.document, this.renderer);
     this.library = new LibraryUI(this.document);
     
     // Setup tools

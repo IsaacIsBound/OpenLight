@@ -6,12 +6,21 @@ import { Document } from '../core/Document';
 import { Shape } from '../core/Shape';
 import { VectorPath, Point, colorToRGBA, Transform } from '../core/types';
 
+export interface OnionSkinSettings {
+  enabled: boolean;
+  framesBefore: number;      // Number of previous frames to show
+  framesAfter: number;       // Number of next frames to show
+  opacityBefore: number;     // Base opacity for previous frames (0-1)
+  opacityAfter: number;      // Base opacity for next frames (0-1)
+  colorBefore: string;       // Tint color for previous frames (red/pink)
+  colorAfter: string;        // Tint color for next frames (green/blue)
+}
+
 export interface RenderOptions {
   showGrid: boolean;
   gridSize: number;
   showGuides: boolean;
-  onionSkinning: boolean;
-  onionSkinFrames: number;
+  onionSkin: OnionSkinSettings;
 }
 
 export class Renderer {
@@ -34,8 +43,15 @@ export class Renderer {
       showGrid: false,
       gridSize: 20,
       showGuides: true,
-      onionSkinning: false,
-      onionSkinFrames: 2,
+      onionSkin: {
+        enabled: false,
+        framesBefore: 2,
+        framesAfter: 2,
+        opacityBefore: 0.3,
+        opacityAfter: 0.3,
+        colorBefore: 'rgba(255, 100, 100',   // Red/pink tint
+        colorAfter: 'rgba(100, 200, 100',    // Green tint
+      },
     };
     
     // Center the stage
@@ -113,8 +129,8 @@ export class Renderer {
       this.drawGrid();
     }
     
-    // Draw onion skin (previous frames) if enabled
-    if (this.options.onionSkinning) {
+    // Draw onion skin (previous/next frames) if enabled
+    if (this.options.onionSkin.enabled) {
       this.drawOnionSkin();
     }
     
@@ -187,43 +203,72 @@ export class Renderer {
    */
   private drawOnionSkin(): void {
     const currentFrame = this.document.currentFrame;
-    const { onionSkinFrames } = this.options;
+    const { onionSkin } = this.options;
     
-    // Draw previous frames
-    for (let i = 1; i <= onionSkinFrames; i++) {
+    // Draw previous frames (furthest first so closer frames are on top)
+    for (let i = onionSkin.framesBefore; i >= 1; i--) {
       const frameIndex = currentFrame - i;
       if (frameIndex < 1) continue;
       
-      const opacity = 0.3 - (i * 0.1);
-      this.drawFrameShapes(frameIndex, `rgba(255, 0, 0, ${opacity})`);
+      // Opacity decreases the further from current frame
+      const opacityFactor = 1 - ((i - 1) / onionSkin.framesBefore);
+      const opacity = onionSkin.opacityBefore * opacityFactor;
+      const tint = `${onionSkin.colorBefore}, ${opacity})`;
+      
+      this.drawFrameShapes(frameIndex, tint, opacity);
     }
     
-    // Draw next frames (optional)
-    for (let i = 1; i <= onionSkinFrames; i++) {
+    // Draw next frames (furthest first so closer frames are on top)
+    for (let i = onionSkin.framesAfter; i >= 1; i--) {
       const frameIndex = currentFrame + i;
       if (frameIndex > this.document.totalFrames) continue;
       
-      const opacity = 0.3 - (i * 0.1);
-      this.drawFrameShapes(frameIndex, `rgba(0, 128, 0, ${opacity})`);
+      // Opacity decreases the further from current frame
+      const opacityFactor = 1 - ((i - 1) / onionSkin.framesAfter);
+      const opacity = onionSkin.opacityAfter * opacityFactor;
+      const tint = `${onionSkin.colorAfter}, ${opacity})`;
+      
+      this.drawFrameShapes(frameIndex, tint, opacity);
     }
   }
   
   /**
-   * Draw shapes at a specific frame with tint
+   * Draw shapes at a specific frame with tint for onion skinning
    */
-  private drawFrameShapes(frameIndex: number, tint: string): void {
-    const originalFrame = this.document.currentFrame;
-    this.document.currentFrame = frameIndex;
+  private drawFrameShapes(frameIndex: number, tint: string, opacity: number): void {
+    const { ctx } = this;
     
-    const shapes = this.document.getVisibleShapes();
-    this.ctx.globalAlpha = 0.3;
+    // Get shapes at the specified frame without changing document state
+    const shapes = this.getShapesAtFrame(frameIndex);
+    
+    ctx.save();
+    ctx.globalAlpha = opacity;
     
     for (const { shape } of shapes) {
       this.drawShape(shape, tint);
     }
     
-    this.ctx.globalAlpha = 1;
-    this.document.currentFrame = originalFrame;
+    ctx.restore();
+  }
+  
+  /**
+   * Get shapes visible at a specific frame (without changing document state)
+   */
+  private getShapesAtFrame(frameIndex: number): Array<{ shape: Shape; layerId: string }> {
+    const result: Array<{ shape: Shape; layerId: string }> = [];
+    
+    // Iterate from bottom to top (last layer is bottom)
+    for (let i = this.document.layers.length - 1; i >= 0; i--) {
+      const layer = this.document.layers[i];
+      if (!layer.visible) continue;
+      
+      const shapes = layer.getShapesAtFrame(frameIndex);
+      for (const shape of shapes) {
+        result.push({ shape, layerId: layer.id });
+      }
+    }
+    
+    return result;
   }
   
   /**
@@ -419,5 +464,27 @@ export class Renderer {
    */
   getOptions(): RenderOptions {
     return { ...this.options };
+  }
+  
+  /**
+   * Toggle onion skinning on/off
+   */
+  toggleOnionSkin(): boolean {
+    this.options.onionSkin.enabled = !this.options.onionSkin.enabled;
+    return this.options.onionSkin.enabled;
+  }
+  
+  /**
+   * Get onion skin settings
+   */
+  getOnionSkinSettings(): OnionSkinSettings {
+    return { ...this.options.onionSkin };
+  }
+  
+  /**
+   * Update onion skin settings
+   */
+  setOnionSkinSettings(settings: Partial<OnionSkinSettings>): void {
+    this.options.onionSkin = { ...this.options.onionSkin, ...settings };
   }
 }

@@ -3,10 +3,12 @@
  */
 
 import { Document } from '../core/Document';
+import { Renderer } from '../render/Renderer';
 import { UID } from '../core/types';
 
 export class TimelineUI {
   private document: Document;
+  private renderer: Renderer | null = null;
   private layersPanel: HTMLElement;
   private framesContainer: HTMLElement;
   private framesGrid: HTMLElement;
@@ -14,13 +16,15 @@ export class TimelineUI {
   private playhead: HTMLElement;
   private currentFrameDisplay: HTMLElement;
   private totalFramesDisplay: HTMLElement;
+  private onionSkinBtn: HTMLButtonElement | null = null;
   
   private visibleFrames = 120;  // Number of frames to show
   private isPlaying = false;
   private playInterval: number | null = null;
   
-  constructor(document: Document) {
+  constructor(document: Document, renderer?: Renderer) {
     this.document = document;
+    this.renderer = renderer ?? null;
     
     // Get DOM elements
     this.layersPanel = window.document.getElementById('layers-panel') as HTMLElement;
@@ -40,6 +44,13 @@ export class TimelineUI {
     this.document.on('layerRemove', () => this.render());
     this.document.on('keyframeInsert', () => this.renderFrames());
     this.document.on('keyframeClear', () => this.renderFrames());
+  }
+  
+  /**
+   * Set the renderer reference (for onion skinning controls)
+   */
+  setRenderer(renderer: Renderer): void {
+    this.renderer = renderer;
   }
   
   private setupEventListeners(): void {
@@ -97,6 +108,48 @@ export class TimelineUI {
       const frame = Math.floor(x / 12) + 1;
       this.document.currentFrame = frame;
     });
+    
+    // Onion skinning toggle
+    this.onionSkinBtn = window.document.getElementById('onion-skin-btn') as HTMLButtonElement;
+    this.onionSkinBtn?.addEventListener('click', () => {
+      if (this.renderer) {
+        const enabled = this.renderer.toggleOnionSkin();
+        this.updateOnionSkinButton(enabled);
+        this.document.emit('render');
+      }
+    });
+    
+    // Onion skin settings inputs
+    const onionBeforeInput = window.document.getElementById('onion-before') as HTMLInputElement;
+    const onionAfterInput = window.document.getElementById('onion-after') as HTMLInputElement;
+    
+    onionBeforeInput?.addEventListener('change', () => {
+      if (this.renderer) {
+        const value = Math.max(0, Math.min(10, parseInt(onionBeforeInput.value, 10) || 2));
+        onionBeforeInput.value = String(value);
+        this.renderer.setOnionSkinSettings({ framesBefore: value });
+        this.document.emit('render');
+      }
+    });
+    
+    onionAfterInput?.addEventListener('change', () => {
+      if (this.renderer) {
+        const value = Math.max(0, Math.min(10, parseInt(onionAfterInput.value, 10) || 2));
+        onionAfterInput.value = String(value);
+        this.renderer.setOnionSkinSettings({ framesAfter: value });
+        this.document.emit('render');
+      }
+    });
+  }
+  
+  /**
+   * Update onion skin button visual state
+   */
+  private updateOnionSkinButton(enabled: boolean): void {
+    if (this.onionSkinBtn) {
+      this.onionSkinBtn.classList.toggle('active', enabled);
+      this.onionSkinBtn.title = enabled ? 'Onion Skin: ON' : 'Onion Skin: OFF';
+    }
   }
   
   /**
