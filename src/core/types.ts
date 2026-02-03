@@ -75,6 +75,7 @@ export interface VectorPath {
 
 // Symbol types (like Flash)
 export type SymbolType = 'graphic' | 'movieclip' | 'button';
+export { SymbolType };
 
 // Tween types
 export type TweenType = 'none' | 'motion' | 'shape';

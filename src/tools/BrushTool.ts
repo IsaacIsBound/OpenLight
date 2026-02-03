@@ -189,7 +189,7 @@ export class PenTool extends Tool {
   private anchorPoints: Point[] = [];
   private controlPoints: Array<{ in: Point | null; out: Point | null }> = [];
   private isDraggingHandle = false;
-  private currentHandlePoint: Point | null = null;
+  private _currentHandlePoint: Point | null = null;
   
   constructor(context: ToolContext) {
     super(context);
@@ -239,7 +239,7 @@ export class PenTool extends Tool {
         y: anchor.y - (stagePoint.y - anchor.y),
       };
       
-      this.currentHandlePoint = stagePoint;
+      this._currentHandlePoint = stagePoint;
     }
     
     this.context.renderer.render();
@@ -247,7 +247,7 @@ export class PenTool extends Tool {
   
   onPointerUp(event: PointerEvent): void {
     this.isDraggingHandle = false;
-    this.currentHandlePoint = null;
+    this._currentHandlePoint = null;
     this.context.renderer.render();
   }
   
@@ -398,7 +398,7 @@ export class PenTool extends Tool {
     return 'crosshair';
   }
   
-  onKeyDown(key: string, event: KeyboardEvent): void {
+  onKeyDown(key: string, _event: KeyboardEvent): void {
     // Escape to cancel current path
     if (key === 'Escape') {
       this.anchorPoints = [];

@@ -3,8 +3,6 @@
  */
 
 import { Document } from '../core/Document';
-import { Layer } from '../core/Layer';
-import { Frame } from '../core/Frame';
 import { UID } from '../core/types';
 
 export class TimelineUI {
@@ -25,13 +23,13 @@ export class TimelineUI {
     this.document = document;
     
     // Get DOM elements
-    this.layersPanel = document.getElementById('layers-panel') as HTMLElement;
-    this.framesContainer = document.getElementById('frames-container') as HTMLElement;
-    this.framesGrid = document.getElementById('frames-grid') as HTMLElement;
-    this.frameRuler = document.getElementById('frame-ruler') as HTMLElement;
-    this.playhead = document.getElementById('playhead') as HTMLElement;
-    this.currentFrameDisplay = document.getElementById('current-frame') as HTMLElement;
-    this.totalFramesDisplay = document.getElementById('total-frames') as HTMLElement;
+    this.layersPanel = window.document.getElementById('layers-panel') as HTMLElement;
+    this.framesContainer = window.document.getElementById('frames-container') as HTMLElement;
+    this.framesGrid = window.document.getElementById('frames-grid') as HTMLElement;
+    this.frameRuler = window.document.getElementById('frame-ruler') as HTMLElement;
+    this.playhead = window.document.getElementById('playhead') as HTMLElement;
+    this.currentFrameDisplay = window.document.getElementById('current-frame') as HTMLElement;
+    this.totalFramesDisplay = window.document.getElementById('total-frames') as HTMLElement;
     
     this.setupEventListeners();
     this.render();

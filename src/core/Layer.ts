@@ -186,7 +186,7 @@ export class Layer {
   /**
    * Extend layer to frame count
    */
-  extendTo(frameCount: number): void {
+  extendTo(_frameCount: number): void {
     // Just ensure we have at least one keyframe, frames in between are implicit
     if (this.frames.length === 0) {
       this.frames.push(new Frame({ index: 1, isKeyframe: true }));

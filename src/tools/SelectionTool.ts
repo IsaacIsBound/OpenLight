@@ -16,9 +16,9 @@ export class SelectionTool extends Tool {
   readonly shortcut = 'V';
   
   private dragMode: DragMode = 'none';
-  private dragOffset: Point = { x: 0, y: 0 };
-  private resizeHandle: ResizeHandle | null = null;
-  private selectedShape: Shape | null = null;
+  private _dragOffset: Point = { x: 0, y: 0 };
+  private _resizeHandle: ResizeHandle | null = null;
+  private _selectedShape: Shape | null = null;
   
   // Selection marquee
   private marqueeStart: Point | null = null;
@@ -55,9 +55,9 @@ export class SelectionTool extends Tool {
         }
       }
       
-      this.selectedShape = hitShape;
+      this._selectedShape = hitShape;
       this.dragMode = 'move';
-      this.dragOffset = {
+      this._dragOffset = {
         x: stagePoint.x - hitShape.transform.x,
         y: stagePoint.y - hitShape.transform.y,
       };
@@ -105,7 +105,7 @@ export class SelectionTool extends Tool {
     this.dragMode = 'none';
     this.marqueeStart = null;
     this.marqueeEnd = null;
-    this.selectedShape = null;
+    this._selectedShape = null;
     
     super.onPointerUp(event);
     this.context.renderer.render();

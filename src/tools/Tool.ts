@@ -86,21 +86,21 @@ export abstract class Tool {
   /**
    * Key down
    */
-  onKeyDown(key: string, event: KeyboardEvent): void {
+  onKeyDown(_key: string, _event: KeyboardEvent): void {
     // Override in subclass
   }
   
   /**
    * Key up
    */
-  onKeyUp(key: string, event: KeyboardEvent): void {
+  onKeyUp(_key: string, _event: KeyboardEvent): void {
     // Override in subclass
   }
   
   /**
    * Draw tool preview (e.g., shape being created)
    */
-  drawPreview(ctx: CanvasRenderingContext2D): void {
+  drawPreview(_ctx: CanvasRenderingContext2D): void {
     // Override in subclass
   }
   

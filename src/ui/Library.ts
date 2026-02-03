@@ -3,8 +3,8 @@
  */
 
 import { Document } from '../core/Document';
-import { Symbol, SymbolType } from '../core/Symbol';
-import { UID } from '../core/types';
+import { Symbol } from '../core/Symbol';
+import { UID, SymbolType } from '../core/types';
 
 export class LibraryUI {
   private document: Document;
@@ -67,7 +67,7 @@ export class LibraryUI {
     }
   }
   
-  private renderGroup(title: string, symbols: Symbol[], icon: string): void {
+  private renderGroup(title: string, symbols: Symbol[], _icon: string): void {
     const header = window.document.createElement('div');
     header.className = 'library-group-header';
     header.style.cssText = 'padding: 8px 10px; font-size: 11px; color: var(--text-secondary); text-transform: uppercase;';

@@ -62,10 +62,11 @@ export class Document {
       this._selectedLayerId = initialLayer.id;
     }
     
-    // Load library
+    // Load library from serialized data
     if (data?.library) {
       for (const symbolData of data.library) {
-        this.library.addSymbol(new Symbol(symbolData as any));
+        const sym = new Symbol(symbolData);
+        this.library.addSymbol(sym);
       }
     }
   }

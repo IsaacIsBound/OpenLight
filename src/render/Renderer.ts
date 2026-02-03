@@ -4,7 +4,7 @@
 
 import { Document } from '../core/Document';
 import { Shape } from '../core/Shape';
-import { VectorPath, PathCommand, Point, colorToRGBA, Transform } from '../core/types';
+import { VectorPath, Point, colorToRGBA, Transform } from '../core/types';
 
 export interface RenderOptions {
   showGrid: boolean;
@@ -120,7 +120,7 @@ export class Renderer {
     
     // Draw all visible shapes
     const shapes = this.document.getVisibleShapes();
-    for (const { shape, layerId } of shapes) {
+    for (const { shape } of shapes) {
       this.drawShape(shape);
     }
     

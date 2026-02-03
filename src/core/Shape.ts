@@ -10,7 +10,6 @@ import {
   VectorPath,
   StrokeStyle,
   FillStyle,
-  Color,
   generateUID,
   createDefaultTransform,
 } from './types';

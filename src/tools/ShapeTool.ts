@@ -4,7 +4,7 @@
 
 import { Tool, ToolContext, PointerEvent } from './Tool';
 import { Shape } from '../core/Shape';
-import { Point, ToolType, FillStyle, StrokeStyle, hexToColor } from '../core/types';
+import { ToolType, FillStyle, StrokeStyle, hexToColor } from '../core/types';
 
 export class RectangleTool extends Tool {
   readonly type: ToolType = 'rectangle';
@@ -282,7 +282,7 @@ export class LineTool extends Tool {
     this.context.renderer.render();
   }
   
-  drawPreview(ctx: CanvasRenderingContext2D): void {
+  drawPreview(_ctx: CanvasRenderingContext2D): void {
     if (this.previewShape) {
       this.context.renderer.drawShape(this.previewShape);
     }
