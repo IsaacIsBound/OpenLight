@@ -1,10 +1,10 @@
-# 🔥 Flare
+# 💡 OpenLight
 
 **The open source Flash animation tool the industry deserves.**
 
-Flare is a modern, web-based animation editor that preserves the classic Flash/Animate workflow that animators love. Built for the browser, ready for Electron, designed for professionals.
+OpenLight is a modern, web-based animation editor that preserves the classic Flash/Animate workflow that animators love. Built for the browser, ready for Electron, designed for professionals.
 
-## Why Flare?
+## Why OpenLight?
 
 Adobe Flash shaped an entire generation of animators. Its timeline-based workflow, symbol/library system, and intuitive tweening tools became the industry standard. When Flash died, nothing truly replaced it.
 
@@ -14,7 +14,7 @@ Existing alternatives fall short:
 - **Pencil2D** — Good for traditional animation, weak on symbols/tweening
 - **Adobe Animate** — Expensive, subscription-only, increasingly bloated
 
-**Flare brings back what made Flash great:**
+**OpenLight brings back what made Flash great:**
 - 🎬 **Classic timeline** — Layers, keyframes, onion skinning
 - 🎨 **Vector drawing tools** — Pen, brush, shapes with smooth curves
 - 📚 **Symbol/Library system** — MovieClips, Graphics, nested timelines
@@ -47,8 +47,8 @@ Existing alternatives fall short:
 
 ```bash
 # Clone the repo
-git clone https://github.com/IsaacBinding/flare.git
-cd flare
+git clone https://github.com/IsaacBinding/OpenLight.git
+cd openlight
 
 # Install dependencies
 npm install
@@ -69,7 +69,7 @@ Open `http://localhost:5173` in your browser.
 ## Project Structure
 
 ```
-flare/
+openlight/
 ├── src/
 │   ├── core/           # Core engine (Document, Timeline, Symbol)
 │   ├── render/         # Canvas/WebGL rendering

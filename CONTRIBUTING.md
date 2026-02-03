@@ -1,6 +1,6 @@
-# Contributing to Flare
+# Contributing to OpenLight
 
-First off, thank you for considering contributing to Flare! 🔥
+First off, thank you for considering contributing to OpenLight! 🔥
 
 ## Development Setup
 

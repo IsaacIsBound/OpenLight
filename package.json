@@ -1,5 +1,5 @@
 {
-  "name": "flare",
+  "name": "openlight",
   "version": "0.1.0",
   "description": "Open source Flash animation tool",
   "type": "module",
@@ -17,7 +17,7 @@
     "timeline",
     "tweening"
   ],
-  "author": "Flare Contributors",
+  "author": "OpenLight Contributors",
   "license": "MIT",
   "devDependencies": {
     "typescript": "^5.3.3",
