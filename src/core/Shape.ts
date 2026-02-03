@@ -219,4 +219,18 @@ export class Shape {
       transform: this.transform,
     };
   }
+  
+  /**
+   * Create shape from JSON data
+   */
+  static fromJSON(data: ShapeData): Shape {
+    return new Shape({
+      id: data.id,
+      name: data.name,
+      paths: data.paths,
+      stroke: data.stroke,
+      fill: data.fill,
+      transform: data.transform,
+    });
+  }
 }

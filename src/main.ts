@@ -12,12 +12,14 @@ import { BrushTool, PenTool } from './tools/BrushTool';
 import { TimelineUI } from './ui/Timeline';
 import { LibraryUI } from './ui/Library';
 import { ToolType } from './core/types';
+import { HistoryManager } from './core/History';
 
 class FlareApp {
   private document: Document;
   private renderer: Renderer;
   private timeline: TimelineUI;
   private library: LibraryUI;
+  private history: HistoryManager;
   
   private tools: Map<ToolType, Tool> = new Map();
   private currentTool: Tool | null = null;
@@ -47,6 +49,9 @@ class FlareApp {
     // Create renderer
     this.renderer = new Renderer(this.canvas, this.document);
     
+    // Create history manager
+    this.history = new HistoryManager(this.document);
+    
     // Create UI
     this.timeline = new TimelineUI(this.document, this.renderer);
     this.library = new LibraryUI(this.document);
@@ -74,6 +79,7 @@ class FlareApp {
     const context: ToolContext = {
       document: this.document,
       renderer: this.renderer,
+      history: this.history,
       strokeColor: this.strokeColor,
       fillColor: this.fillColor,
       strokeWidth: this.strokeWidth,
@@ -89,6 +95,25 @@ class FlareApp {
   }
   
   private setupEventListeners(): void {
+    // Undo/Redo buttons
+    const undoBtn = document.getElementById('btn-undo');
+    const redoBtn = document.getElementById('btn-redo');
+    
+    undoBtn?.addEventListener('click', () => {
+      if (this.history.undo()) {
+        this.updateHistoryUI();
+      }
+    });
+    
+    redoBtn?.addEventListener('click', () => {
+      if (this.history.redo()) {
+        this.updateHistoryUI();
+      }
+    });
+    
+    // Subscribe to history changes
+    this.document.on('historyChange', () => this.updateHistoryUI());
+    
     // Toolbar buttons
     document.querySelectorAll('.toolbar-btn[data-tool]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -259,11 +284,24 @@ class FlareApp {
           break;
         case 'z':
           e.preventDefault();
-          // TODO: Undo
+          if (e.shiftKey) {
+            // Ctrl+Shift+Z = Redo
+            if (this.history.redo()) {
+              this.updateHistoryUI();
+            }
+          } else {
+            // Ctrl+Z = Undo
+            if (this.history.undo()) {
+              this.updateHistoryUI();
+            }
+          }
           break;
         case 'y':
           e.preventDefault();
-          // TODO: Redo
+          // Ctrl+Y = Redo (alternative)
+          if (this.history.redo()) {
+            this.updateHistoryUI();
+          }
           break;
       }
     }
@@ -334,6 +372,37 @@ class FlareApp {
     
     URL.revokeObjectURL(url);
     console.log('💾 Project saved');
+  }
+  
+  /**
+   * Update history UI buttons state
+   */
+  private updateHistoryUI(): void {
+    const state = this.history.getState();
+    
+    const undoBtn = document.getElementById('btn-undo') as HTMLButtonElement;
+    const redoBtn = document.getElementById('btn-redo') as HTMLButtonElement;
+    
+    if (undoBtn) {
+      undoBtn.disabled = !state.canUndo;
+      undoBtn.title = state.undoDescription 
+        ? `Undo: ${state.undoDescription}` 
+        : 'Nothing to undo';
+    }
+    
+    if (redoBtn) {
+      redoBtn.disabled = !state.canRedo;
+      redoBtn.title = state.redoDescription 
+        ? `Redo: ${state.redoDescription}` 
+        : 'Nothing to redo';
+    }
+  }
+  
+  /**
+   * Get history manager (for tools)
+   */
+  getHistory(): HistoryManager {
+    return this.history;
   }
 }
 

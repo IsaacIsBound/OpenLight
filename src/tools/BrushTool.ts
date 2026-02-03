@@ -5,6 +5,7 @@
 import { Tool, ToolContext, PointerEvent } from './Tool';
 import { Shape } from '../core/Shape';
 import { Point, ToolType, VectorPath, PathCommand, FillStyle, StrokeStyle, hexToColor } from '../core/types';
+import { AddShapeCommand } from '../core/History';
 
 export class BrushTool extends Tool {
   readonly type: ToolType = 'brush';
@@ -63,7 +64,20 @@ export class BrushTool extends Tool {
         stroke,
       });
       
-      this.context.document.addShape(shape);
+      const layerId = this.context.document.selectedLayerId;
+      const frameIndex = this.context.document.currentFrame;
+      
+      if (layerId && this.context.history) {
+        const cmd = new AddShapeCommand(
+          this.context.document,
+          layerId,
+          frameIndex,
+          shape
+        );
+        this.context.history.execute(cmd);
+      } else {
+        this.context.document.addShape(shape);
+      }
     }
     
     this.points = [];
@@ -265,7 +279,20 @@ export class PenTool extends Tool {
       fill,
     });
     
-    this.context.document.addShape(shape);
+    const layerId = this.context.document.selectedLayerId;
+    const frameIndex = this.context.document.currentFrame;
+    
+    if (layerId && this.context.history) {
+      const cmd = new AddShapeCommand(
+        this.context.document,
+        layerId,
+        frameIndex,
+        shape
+      );
+      this.context.history.execute(cmd);
+    } else {
+      this.context.document.addShape(shape);
+    }
     
     // Reset
     this.anchorPoints = [];
@@ -418,7 +445,20 @@ export class PenTool extends Tool {
         stroke,
       });
       
-      this.context.document.addShape(shape);
+      const layerId = this.context.document.selectedLayerId;
+      const frameIndex = this.context.document.currentFrame;
+      
+      if (layerId && this.context.history) {
+        const cmd = new AddShapeCommand(
+          this.context.document,
+          layerId,
+          frameIndex,
+          shape
+        );
+        this.context.history.execute(cmd);
+      } else {
+        this.context.document.addShape(shape);
+      }
       
       this.anchorPoints = [];
       this.controlPoints = [];

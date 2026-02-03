@@ -78,6 +78,15 @@
       color: white;
     }
     
+    .toolbar-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    
+    .toolbar-btn:disabled:hover {
+      background: transparent;
+    }
+    
     /* Library Panel */
     .library-panel {
       background: var(--bg-secondary);
@@ -490,6 +499,10 @@
   <div id="app">
     <!-- Toolbar -->
     <div class="toolbar">
+      <div class="toolbar-group">
+        <button class="toolbar-btn" id="btn-undo" title="Undo (Ctrl+Z)" disabled>↶</button>
+        <button class="toolbar-btn" id="btn-redo" title="Redo (Ctrl+Shift+Z)" disabled>↷</button>
+      </div>
       <div class="toolbar-group">
         <button class="toolbar-btn active" data-tool="selection" title="Selection Tool (V)">▢</button>
         <button class="toolbar-btn" data-tool="pen" title="Pen Tool (P)">✒</button>

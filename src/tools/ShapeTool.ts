@@ -5,6 +5,7 @@
 import { Tool, ToolContext, PointerEvent } from './Tool';
 import { Shape } from '../core/Shape';
 import { ToolType, FillStyle, StrokeStyle, hexToColor } from '../core/types';
+import { AddShapeCommand } from '../core/History';
 
 export class RectangleTool extends Tool {
   readonly type: ToolType = 'rectangle';
@@ -73,7 +74,22 @@ export class RectangleTool extends Tool {
       
       // Only add if it has some size
       if (width > 2 && height > 2) {
-        this.context.document.addShape(this.previewShape);
+        const layerId = this.context.document.selectedLayerId;
+        const frameIndex = this.context.document.currentFrame;
+        
+        if (layerId && this.context.history) {
+          // Use history command for undo support
+          const cmd = new AddShapeCommand(
+            this.context.document,
+            layerId,
+            frameIndex,
+            this.previewShape
+          );
+          this.context.history.execute(cmd);
+        } else {
+          // Fallback to direct add
+          this.context.document.addShape(this.previewShape);
+        }
       }
     }
     
@@ -176,7 +192,20 @@ export class OvalTool extends Tool {
       const height = Math.abs(stagePoint.y - this.startPoint.y);
       
       if (width > 2 && height > 2) {
-        this.context.document.addShape(this.previewShape);
+        const layerId = this.context.document.selectedLayerId;
+        const frameIndex = this.context.document.currentFrame;
+        
+        if (layerId && this.context.history) {
+          const cmd = new AddShapeCommand(
+            this.context.document,
+            layerId,
+            frameIndex,
+            this.previewShape
+          );
+          this.context.history.execute(cmd);
+        } else {
+          this.context.document.addShape(this.previewShape);
+        }
       }
     }
     
@@ -273,7 +302,20 @@ export class LineTool extends Tool {
       );
       
       if (distance > 2) {
-        this.context.document.addShape(this.previewShape);
+        const layerId = this.context.document.selectedLayerId;
+        const frameIndex = this.context.document.currentFrame;
+        
+        if (layerId && this.context.history) {
+          const cmd = new AddShapeCommand(
+            this.context.document,
+            layerId,
+            frameIndex,
+            this.previewShape
+          );
+          this.context.history.execute(cmd);
+        } else {
+          this.context.document.addShape(this.previewShape);
+        }
       }
     }
     

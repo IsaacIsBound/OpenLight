@@ -4,10 +4,17 @@
 
 import { Tool, ToolContext, PointerEvent } from './Tool';
 import { Shape } from '../core/Shape';
-import { Point, ToolType } from '../core/types';
+import { Point, ToolType, Transform } from '../core/types';
+import { MoveShapesCommand, RemoveShapesCommand } from '../core/History';
 
 type DragMode = 'none' | 'select' | 'move' | 'resize' | 'rotate';
 type ResizeHandle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
+
+interface MoveTracker {
+  shapeId: string;
+  startX: number;
+  startY: number;
+}
 
 export class SelectionTool extends Tool {
   readonly type: ToolType = 'selection';
@@ -19,6 +26,9 @@ export class SelectionTool extends Tool {
   private _dragOffset: Point = { x: 0, y: 0 };
   private _resizeHandle: ResizeHandle | null = null;
   private _selectedShape: Shape | null = null;
+  
+  // Track move operations for undo
+  private moveTrackers: MoveTracker[] = [];
   
   // Selection marquee
   private marqueeStart: Point | null = null;
@@ -61,6 +71,21 @@ export class SelectionTool extends Tool {
         x: stagePoint.x - hitShape.transform.x,
         y: stagePoint.y - hitShape.transform.y,
       };
+      
+      // Track starting positions for all selected shapes (for undo)
+      const selectedIds = this.context.document.selectedShapeIds;
+      const shapes = this.context.document.getVisibleShapes();
+      this.moveTrackers = [];
+      
+      for (const { shape } of shapes) {
+        if (selectedIds.includes(shape.id)) {
+          this.moveTrackers.push({
+            shapeId: shape.id,
+            startX: shape.transform.x,
+            startY: shape.transform.y,
+          });
+        }
+      }
     } else {
       // Click on empty space - start marquee selection
       this.context.document.clearSelection();
@@ -102,10 +127,45 @@ export class SelectionTool extends Tool {
       this.selectInMarquee();
     }
     
+    // Create move command for undo if we moved shapes
+    if (this.dragMode === 'move' && this.moveTrackers.length > 0 && this.context.history) {
+      const shapes = this.context.document.getVisibleShapes();
+      const movements: Array<{ shapeId: string; startX: number; startY: number; endX: number; endY: number }> = [];
+      
+      for (const tracker of this.moveTrackers) {
+        const shape = shapes.find(s => s.shape.id === tracker.shapeId)?.shape;
+        if (shape) {
+          // Only add to history if actually moved
+          const dx = Math.abs(shape.transform.x - tracker.startX);
+          const dy = Math.abs(shape.transform.y - tracker.startY);
+          
+          if (dx > 0.1 || dy > 0.1) {
+            movements.push({
+              shapeId: tracker.shapeId,
+              startX: tracker.startX,
+              startY: tracker.startY,
+              endX: shape.transform.x,
+              endY: shape.transform.y,
+            });
+          }
+        }
+      }
+      
+      if (movements.length > 0) {
+        // Note: We already moved the shapes during drag, so we use a "pre-executed" command
+        // This adds the move to history without re-executing it
+        const cmd = new MoveShapesCommand(this.context.document, movements);
+        this.context.history['undoStack'].push(cmd);
+        this.context.history['redoStack'] = [];
+        this.context.document.emit('historyChange', this.context.history.getState());
+      }
+    }
+    
     this.dragMode = 'none';
     this.marqueeStart = null;
     this.marqueeEnd = null;
     this._selectedShape = null;
+    this.moveTrackers = [];
     
     super.onPointerUp(event);
     this.context.renderer.render();
@@ -183,7 +243,14 @@ export class SelectionTool extends Tool {
   onKeyDown(key: string, event: KeyboardEvent): void {
     // Delete selected shapes
     if (key === 'Delete' || key === 'Backspace') {
-      this.context.document.removeSelectedShapes();
+      const selectedIds = this.context.document.selectedShapeIds;
+      
+      if (selectedIds.length > 0 && this.context.history) {
+        const cmd = new RemoveShapesCommand(this.context.document, [...selectedIds]);
+        this.context.history.execute(cmd);
+      } else {
+        this.context.document.removeSelectedShapes();
+      }
       this.context.renderer.render();
     }
     

@@ -4,11 +4,13 @@
 
 import { Document } from '../core/Document';
 import { Renderer } from '../render/Renderer';
+import { HistoryManager } from '../core/History';
 import { Point, ToolType } from '../core/types';
 
 export interface ToolContext {
   document: Document;
   renderer: Renderer;
+  history?: HistoryManager;
   strokeColor: string;
   fillColor: string;
   strokeWidth: number;
