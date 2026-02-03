@@ -1,4 +1,4 @@
-# 🔥 Flare Development Roadmap
+# 💡 OpenLight Development Roadmap
 
 ## Current Status: v0.1.0 - Foundation
 
@@ -50,7 +50,7 @@
 - [x] Tool switching with keyboard shortcuts
 - [x] Color pickers for stroke/fill
 - [x] Window resize handling
-- [x] Save to JSON file (.flare format)
+- [x] Save to JSON file (.openlight format)
 - [x] Frame navigation with `,` and `.` keys
 - [x] Spacebar for play/pause
 
@@ -136,7 +136,7 @@
 
 ## Architecture Notes
 
-### File Format (.flare)
+### File Format (.openlight)
 
 JSON-based for readability and git-friendliness:
 
