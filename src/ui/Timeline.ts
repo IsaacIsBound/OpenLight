@@ -153,6 +153,91 @@ export class TimelineUI {
   }
   
   /**
+   * Create a motion tween starting from the specified frame
+   */
+  private createMotionTween(layerId: UID, frameIndex: number): void {
+    const layer = this.document.getLayer(layerId);
+    if (!layer || layer.locked) return;
+    
+    // Get the keyframe at this position
+    const keyframe = layer.getFrame(frameIndex);
+    if (!keyframe?.isKeyframe) {
+      // Need to be on a keyframe to create a tween
+      console.warn('Motion tween must start from a keyframe');
+      return;
+    }
+    
+    // Check if there's a next keyframe to tween to
+    const nextKeyframe = layer.getNextKeyframe(frameIndex);
+    if (!nextKeyframe) {
+      console.warn('No next keyframe to tween to');
+      return;
+    }
+    
+    // Set the motion tween
+    keyframe.setMotionTween({ type: 'easeInOut' });
+    
+    this.renderFrames();
+    this.document.emit('render');
+  }
+  
+  /**
+   * Remove motion tween from the specified frame
+   */
+  private removeMotionTween(layerId: UID, frameIndex: number): void {
+    const layer = this.document.getLayer(layerId);
+    if (!layer || layer.locked) return;
+    
+    // Get the keyframe at or before this position
+    let keyframe = layer.getFrame(frameIndex);
+    
+    // If not on a keyframe, find the keyframe this frame belongs to
+    if (!keyframe?.isKeyframe) {
+      keyframe = layer.getKeyframeAt(frameIndex);
+    }
+    
+    if (keyframe && keyframe.tweenType !== 'none') {
+      keyframe.removeTween();
+      this.renderFrames();
+      this.document.emit('render');
+    }
+  }
+  
+  /**
+   * Set the easing type for a motion tween
+   */
+  private setTweenEasing(layerId: UID, frameIndex: number, easingType: 'linear' | 'easeIn' | 'easeOut' | 'easeInOut'): void {
+    const layer = this.document.getLayer(layerId);
+    if (!layer || layer.locked) return;
+    
+    // Get the keyframe at or before this position
+    let keyframe = layer.getFrame(frameIndex);
+    
+    // If not on a keyframe, find the keyframe this frame belongs to
+    if (!keyframe?.isKeyframe) {
+      keyframe = layer.getKeyframeAt(frameIndex);
+    }
+    
+    if (keyframe) {
+      // If no tween exists yet, create one
+      if (keyframe.tweenType === 'none') {
+        const nextKeyframe = layer.getNextKeyframe(keyframe.index);
+        if (!nextKeyframe) {
+          console.warn('No next keyframe to tween to');
+          return;
+        }
+        keyframe.setMotionTween({ type: easingType });
+      } else {
+        // Update existing tween's easing
+        keyframe.easing = { type: easingType };
+      }
+      
+      this.renderFrames();
+      this.document.emit('render');
+    }
+  }
+  
+  /**
    * Render the entire timeline
    */
   render(): void {
@@ -275,9 +360,22 @@ export class TimelineUI {
           } else {
             frameEl.classList.add('keyframe');
           }
+          
+          // Show tween indicator if this keyframe has a tween
+          if (frame.tweenType === 'motion') {
+            frameEl.classList.add('tween-start');
+          }
         } else if (keyframe && !keyframe.isEmpty) {
           // Frame is filled (extends from previous keyframe)
-          frameEl.style.backgroundColor = 'rgba(79, 195, 247, 0.1)';
+          if (keyframe.tweenType === 'motion') {
+            // This frame is in a motion tween
+            const nextKeyframe = layer.getNextKeyframe(keyframe.index);
+            if (nextKeyframe && i < nextKeyframe.index) {
+              frameEl.classList.add('tween-motion');
+            }
+          } else {
+            frameEl.style.backgroundColor = 'rgba(79, 195, 247, 0.1)';
+          }
         }
         
         // Current frame highlight
@@ -396,10 +494,22 @@ export class TimelineUI {
           this.document.clearKeyframe(layerId, frameIndex);
           break;
         case 'create-tween':
-          // TODO: Implement tween creation
+          this.createMotionTween(layerId, frameIndex);
           break;
         case 'remove-tween':
-          // TODO: Implement tween removal
+          this.removeMotionTween(layerId, frameIndex);
+          break;
+        case 'easing-linear':
+          this.setTweenEasing(layerId, frameIndex, 'linear');
+          break;
+        case 'easing-easein':
+          this.setTweenEasing(layerId, frameIndex, 'easeIn');
+          break;
+        case 'easing-easeout':
+          this.setTweenEasing(layerId, frameIndex, 'easeOut');
+          break;
+        case 'easing-easeinout':
+          this.setTweenEasing(layerId, frameIndex, 'easeInOut');
           break;
       }
       

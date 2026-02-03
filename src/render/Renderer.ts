@@ -4,7 +4,10 @@
 
 import { Document } from '../core/Document';
 import { Shape } from '../core/Shape';
+import { Layer } from '../core/Layer';
+import { Frame } from '../core/Frame';
 import { VectorPath, Point, colorToRGBA, Transform } from '../core/types';
+import { calculateTweenedShapes, TweenedShape, getEasingFunction } from '../core/Tween';
 
 export interface OnionSkinSettings {
   enabled: boolean;
@@ -134,11 +137,8 @@ export class Renderer {
       this.drawOnionSkin();
     }
     
-    // Draw all visible shapes
-    const shapes = this.document.getVisibleShapes();
-    for (const { shape } of shapes) {
-      this.drawShape(shape);
-    }
+    // Draw all visible shapes (with tween interpolation)
+    this.drawVisibleShapesWithTweens();
     
     // Draw selection handles
     this.drawSelectionHandles();
@@ -196,6 +196,106 @@ export class Renderer {
       ctx.lineTo(width, y);
       ctx.stroke();
     }
+  }
+  
+  /**
+   * Draw visible shapes with motion tween interpolation
+   */
+  private drawVisibleShapesWithTweens(): void {
+    const currentFrame = this.document.currentFrame;
+    
+    // Iterate from bottom to top (last layer is bottom)
+    for (let i = this.document.layers.length - 1; i >= 0; i--) {
+      const layer = this.document.layers[i];
+      if (!layer.visible) continue;
+      
+      // Check if current frame is in a tween
+      const tweenResult = this.getTweenedShapesForLayer(layer, currentFrame);
+      
+      if (tweenResult) {
+        // Draw tweened shapes with interpolated transforms
+        for (const { originalShape, tweenedTransform } of tweenResult) {
+          this.drawShapeWithTransform(originalShape, tweenedTransform);
+        }
+      } else {
+        // No tween, draw shapes normally
+        const shapes = layer.getShapesAtFrame(currentFrame);
+        for (const shape of shapes) {
+          this.drawShape(shape);
+        }
+      }
+    }
+  }
+  
+  /**
+   * Get tweened shapes for a layer at a specific frame
+   * Returns null if frame is not in a tween
+   */
+  private getTweenedShapesForLayer(layer: Layer, frameIndex: number): TweenedShape[] | null {
+    // Get the keyframe at or before this frame
+    const startKeyframe = layer.getKeyframeAt(frameIndex);
+    if (!startKeyframe) return null;
+    
+    // If we're exactly on a keyframe, no tweening needed
+    if (startKeyframe.index === frameIndex) return null;
+    
+    // Check if this keyframe has a motion tween
+    if (startKeyframe.tweenType !== 'motion') return null;
+    
+    // Get the next keyframe
+    const endKeyframe = layer.getNextKeyframe(startKeyframe.index);
+    if (!endKeyframe) return null;
+    
+    // Calculate progress through the tween (0-1)
+    const tweenDuration = endKeyframe.index - startKeyframe.index;
+    const progress = (frameIndex - startKeyframe.index) / tweenDuration;
+    
+    // Calculate tweened shapes
+    return calculateTweenedShapes(
+      startKeyframe.shapes,
+      endKeyframe.shapes,
+      progress,
+      startKeyframe.easing
+    );
+  }
+  
+  /**
+   * Draw a shape with a specific transform (for tweening)
+   */
+  drawShapeWithTransform(shape: Shape, transform: Transform, fillOverride?: string): void {
+    const { ctx } = this;
+    
+    ctx.save();
+    
+    // Apply the provided transform instead of shape's transform
+    this.applyTransform(transform);
+    
+    // Draw each path
+    for (const path of shape.paths) {
+      ctx.beginPath();
+      this.tracePath(path);
+      
+      // Fill
+      if (shape.fill || fillOverride) {
+        if (fillOverride) {
+          ctx.fillStyle = fillOverride;
+        } else if (shape.fill?.type === 'solid' && shape.fill.color) {
+          ctx.fillStyle = colorToRGBA(shape.fill.color);
+        }
+        ctx.fill();
+      }
+      
+      // Stroke
+      if (shape.stroke) {
+        ctx.strokeStyle = colorToRGBA(shape.stroke.color);
+        ctx.lineWidth = shape.stroke.width;
+        ctx.lineCap = shape.stroke.lineCap;
+        ctx.lineJoin = shape.stroke.lineJoin;
+        ctx.stroke();
+      }
+    }
+    
+    ctx.restore();
   }
   
   /**
