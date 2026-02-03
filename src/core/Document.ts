@@ -6,7 +6,7 @@ import { UID, generateUID, Color, hexToColor } from './types';
 import { Layer } from './Layer';
 import { Frame } from './Frame';
 import { Shape } from './Shape';
-import { Symbol, Library } from './Symbol';
+import { Symbol, Library, SymbolData } from './Symbol';
 
 export interface DocumentSettings {
   width: number;
@@ -20,7 +20,7 @@ export interface DocumentData {
   name: string;
   settings: DocumentSettings;
   layers: Layer[];
-  library: Symbol[];
+  library: SymbolData[];
   version: string;
 }
 
