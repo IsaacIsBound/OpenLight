@@ -56,21 +56,36 @@
 
 ---
 
-## 🚧 In Progress
+## ✅ Completed - v0.2.0
 
-### v0.2.0 - Animation Essentials
+### v0.2.0 - Animation Essentials (Feb 3, 2024)
 
 #### Onion Skinning
-- [ ] Show previous frames (red tint)
-- [ ] Show next frames (green tint)
-- [ ] Configurable frame range
-- [ ] Toggle button in timeline
+- [x] Show previous frames (red/pink tint)
+- [x] Show next frames (green tint)
+- [x] Configurable frame range (before/after inputs)
+- [x] Toggle button in timeline (🧅)
 
 #### Motion Tweening
-- [ ] Detect tween-able keyframe pairs
-- [ ] Interpolate position, rotation, scale, alpha
-- [ ] Easing functions (linear, ease in/out, custom bezier)
-- [ ] Visual tween indicator in timeline
+- [x] Detect tween-able keyframe pairs
+- [x] Interpolate position, rotation, scale, alpha
+- [x] Easing functions (linear, easeIn, easeOut, easeInOut, cubic, elastic, bounce)
+- [x] Visual tween indicator in timeline (purple gradient)
+- [x] Context menu to create/remove tweens and set easing
+
+#### Undo/Redo System (moved from v0.4.0)
+- [x] Command pattern implementation (HistoryManager)
+- [x] Track all document mutations
+- [x] Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y shortcuts
+- [x] Toolbar buttons with state indication
+- [x] Commands: AddShape, RemoveShapes, MoveShapes, TransformShapes,
+      InsertKeyframe, ClearKeyframe, AddLayer, RemoveLayer, SetTween
+
+---
+
+## 🚧 In Progress
+
+### v0.2.1 - Animation Essentials (continued)
 
 #### Shape Tweening
 - [ ] Path morphing between shapes
@@ -89,7 +104,6 @@
 
 ### v0.4.0 - Professional Tools
 
-- [ ] **Undo/Redo** - Command pattern implementation
 - [ ] **Copy/Paste** - Shapes and frames
 - [ ] **Transform Tool** - Free transform with handles
 - [ ] **Subselection Tool** - Edit bezier points
